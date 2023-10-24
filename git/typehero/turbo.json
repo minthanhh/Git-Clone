@@ -1,0 +1,89 @@
+{
+  "experimentalSpaces": { "id": "space_CWwpUyi1jEpIayj8iSDdz2Ze" },
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build", "@repo/db#db:generate"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [
+        "VERCEL_URL",
+        "VERCEL_ENV",
+        "STAGING",
+        "NODE_ENV",
+        "DATABASE_URL",
+        "GITHUB_ID",
+        "GITHUB_SECRET",
+        "GITHUB_ADMIN_ID",
+        "GITHUB_ADMIN_SECRET",
+        "UPLOADTHING_SECRET",
+        "UPLOADTHING_APP_ID",
+        "EDGE_CONFIG",
+        "NEXTAUTH_SECRET",
+        "NEXTAUTH_URL",
+        "RESEND_API_KEY",
+        "PORT",
+        "USERNAME",
+        "PASSWORD",
+        "CI",
+        "MAILCHIMP_API_KEY",
+        "MAILCHIMP_AUDIENCE_ID",
+        "MAILCHIMP_API_SERVER"
+      ]
+    },
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
+    "//#format": {
+      "outputs": ["node_modules/.cache/prettiercache"],
+      "outputMode": "errors-only"
+    },
+    "format": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/prettiercache"],
+      "outputMode": "errors-only"
+    },
+    "//#format:fix": {
+      "outputs": ["node_modules/.cache/prettiercache"],
+      "outputMode": "errors-only"
+    },
+    "format:fix": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/prettiercache"],
+      "outputMode": "errors-only"
+    },
+    "//#lint": {
+      "outputs": ["node_modules/.cache/.eslintcache"],
+      "outputMode": "errors-only"
+    },
+    "lint": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/.eslintcache"],
+      "outputMode": "errors-only"
+    },
+    "//#lint:fix": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/.eslintcache"],
+      "outputMode": "errors-only"
+    },
+    "lint:fix": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/.eslintcache"],
+      "outputMode": "errors-only"
+    },
+    "typecheck": {
+      "dependsOn": ["@repo/db#db:generate", "^topo"],
+      "outputs": ["node_modules/.cache/tsbuildinfo.json"],
+      "outputMode": "errors-only"
+    },
+    "clean": {
+      "cache": false
+    },
+    "dev": {
+      "dependsOn": ["@repo/db#db:generate"],
+      "persistent": true,
+      "cache": false
+    },
+    "test:e2e": {
+      "outputs": ["playwright-report/**"]
+    }
+  }
+}
