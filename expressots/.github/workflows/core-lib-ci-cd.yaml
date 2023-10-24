@@ -1,0 +1,82 @@
+name: Build and Release
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches:
+      - main          
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.10.0'
+
+    - name: Install Dependencies
+      working-directory: packages/core
+      run: npm install
+      
+    - name: Unit Tests
+      working-directory: packages/core
+      run: npm test
+      env:
+        CI: true
+        
+    # Generate changelog
+    - name: Generate changelog
+      id: changelog
+      working-directory: ${{ github.workspace }}
+      run: |
+        # extract the changelog
+        echo "::set-output name=tag::$(grep -oP '^## \[(\d+\.\d+\.\d+)\]' CHANGELOG.md | head -n 1 | cut -d '[' -f 2 | cut -d ']' -f 1)" 
+        echo v${{ steps.changelog.outputs.tag }}
+
+    # Create git release
+    - name: Github release
+      uses: actions/create-release@v1
+      if: github.event.pull_request.merged == true
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        tag_name: v${{ steps.changelog.outputs.tag }}
+        release_name: ${{ steps.changelog.outputs.tag }}
+        body: |
+          Changes in this Release
+          - ${{ steps.changelog.outputs.tag }}
+        draft: false
+        prerelease: false
+
+
+    #- name: Publish to NPM
+    #  env:
+    #    NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+    #  run: |
+    #    if [ "${{ github.event_name }}" != "push" ]; then
+    #      exit 0
+    #    fi
+
+        # Check test coverage
+    #    COVERAGE_THRESHOLD=70
+    #    COVERAGE=$(npm run coverage --silent | tail -n 1)
+    #    COVERAGE=${COVERAGE#* }
+    #    COVERAGE=${COVERAGE%.*}
+    #    echo "Coverage: $COVERAGE%"
+    #    if [ $COVERAGE -lt $COVERAGE_THRESHOLD ]; then
+    #      echo "Failed test coverage check ($COVERAGE% < $COVERAGE_THRESHOLD%)."
+    #      exit 1
+    #    fi
+
+        # Install Node.js v18.10.0 and publish to NPM
+    #    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    #    sudo apt-get install -y nodejs
+    #    cd packages/core && npm publish
